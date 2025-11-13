@@ -87,58 +87,73 @@
 class Solution {
 public:
     vector<int> findSubstring(string s, vector<string>& words) {
+        /*
+            Same logic as original:
+            - mp stores frequency of target words
+            - mp2 used per window
+            - check substrings of size len
+            But now:
+            - We add offset sliding (0 to len-1)
+            - Slide by len at a time
+            - Maintain window using mp2 and count
+        */
+
+        unordered_map<string,int> mp;
+        for (auto &it : words) {
+            mp[it]++;
+        }
+
         vector<int> ans;
-        if (words.empty() || s.empty()) return ans;
-
-        int wordCount = words.size();
-        int wordLen = words[0].size();
-        if (wordLen == 0) return ans;
-
+        int len = words[0].size();
         int n = s.size();
-        int windowLen = wordCount * wordLen;
-        if (n < windowLen) return ans;
+        int wordlen = words.size();
+        int totallen = len * wordlen;
 
-        unordered_map<string,int> freq;
-        for (auto &w : words) freq[w]++;
+        if (n < totallen)
+            return ans;
 
-        // Try each offset 0..wordLen-1
-        for (int offset = 0; offset < wordLen; ++offset) {
-            int left = offset;
-            int count = 0; // how many words currently in window
-            unordered_map<string,int> seen;
+        // try every offset
+        for (int start = 0; start < len; start++) {
 
-            // slide right in steps of wordLen
-            for (int right = offset; right + wordLen <= n; right += wordLen) {
-                string w = s.substr(right, wordLen);
+            int i = start;                // left pointer
+            int count = 0;                // how many words matched
+            unordered_map<string,int> mp2; // seen words
 
-                // if this piece is a valid word
-                if (freq.count(w)) {
-                    seen[w]++;
+            // slide right pointer j by word length
+            for (int j = start; j + len <= n; j += len) {
+
+                string k = s.substr(j, len);
+
+                // valid word
+                if (mp.count(k)) {
+
+                    mp2[k]++;
                     count++;
 
-                    // if seen exceeds allowed, shrink from left
-                    while (seen[w] > freq[w]) {
-                        string leftWord = s.substr(left, wordLen);
-                        seen[leftWord]--;
-                        left += wordLen;
+                    // shrink window if exceeded allowed freq
+                    while (mp2[k] > mp[k]) {
+                        string leftWord = s.substr(i, len);
+                        mp2[leftWord]--;
+                        i += len;
                         count--;
                     }
 
-                    // If window has exactly wordCount words, record start
-                    if (count == wordCount) {
-                        ans.push_back(left);
-                        // move left forward by one word to look for next possibility
-                        string leftWord = s.substr(left, wordLen);
-                        seen[leftWord]--;
-                        left += wordLen;
+                    // if window contains all words
+                    if (count == wordlen) {
+                        ans.push_back(i);
+
+                        // move left by one word to search further
+                        string leftWord = s.substr(i, len);
+                        mp2[leftWord]--;
+                        i += len;
                         count--;
                     }
 
                 } else {
-                    // not a word — reset window after this position
-                    seen.clear();
+                    // reset window if invalid word
+                    mp2.clear();
                     count = 0;
-                    left = right + wordLen;
+                    i = j + len;
                 }
             }
         }
