@@ -24,36 +24,38 @@ public:
                 }
             }
         }
-         if (numberOfOnes == 0){
+
+        if (q.empty() && numberOfOnes > 0) {
+            return -1;
+        } else if (q.empty() && numberOfOnes == 0) {
             return 0;
         }
-        if (q.empty()) {
-            return -1;
+        if (numberOfOnes == 0) {
+            return 0;
         }
-        
-       
         int m = grid.size();
         int n = grid[0].size();
         int ans = -1;
-        vector<pair<int,int>> directions = {{1,0},{-1,0},{0,-1},{0,1}};
-        while(!q.empty()) {
-            int size =  q.size();
-            while(size--) {
-                auto [x,y] = q.front();
+        vector<pair<int, int>> directions = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
+        while (!q.empty()) {
+            int size = q.size();
+            while (size--) {
+                auto [x, y] = q.front();
                 q.pop();
-                for(auto it: directions) {
+                for (auto it : directions) {
                     int i = x + it.first;
                     int j = y + it.second;
-                    if(i >= 0 && i < m && j >= 0 && j < n && visited[i][j] == 1) {
+                    if (i >= 0 && i < m && j >= 0 && j < n &&
+                        visited[i][j] == 1) {
                         visited[i][j] = 2;
                         numberOfOnes--;
-                        q.push({i,j});
+                        q.push({i, j});
                     }
                 }
             }
             ans++;
         }
-        if(numberOfOnes == 0){
+        if (numberOfOnes == 0) {
             return ans;
         }
         return -1;
