@@ -27,7 +27,7 @@ public:
          if (numberOfOnes == 0){
             return 0;
         }
-        if (q.empty() && numberOfOnes>0) {
+        if (q.empty()) {
             return -1;
         }
         
